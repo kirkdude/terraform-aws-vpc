@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '50 1 * * *'
 
+permissions:
+  issues: write # for dessant/lock-threads to lock issues
+  pull-requests: write # for dessant/lock-threads to lock PRs
+
 jobs:
   lock:
     runs-on: ubuntu-latest

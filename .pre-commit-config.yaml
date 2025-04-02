@@ -1,30 +1,192 @@
+---
 repos:
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.96.2
+  # Dockerfile Linting
+  # Lints Dockerfiles to ensure they adhere to best practices.
+  - repo: https://github.com/petalmd/dockerfile-pre-commit
+    rev: v1.0
     hooks:
-      - id: terraform_fmt
-      - id: terraform_docs
-        args:
-          - '--args=--lockfile=false'
-      - id: terraform_tflint
-        args:
-          - '--args=--only=terraform_deprecated_interpolation'
-          - '--args=--only=terraform_deprecated_index'
-          - '--args=--only=terraform_unused_declarations'
-          - '--args=--only=terraform_comment_syntax'
-          - '--args=--only=terraform_documented_outputs'
-          - '--args=--only=terraform_documented_variables'
-          - '--args=--only=terraform_typed_variables'
-          - '--args=--only=terraform_module_pinned_source'
-          - '--args=--only=terraform_naming_convention'
-          - '--args=--only=terraform_required_version'
-          - '--args=--only=terraform_required_providers'
-          - '--args=--only=terraform_standard_module_structure'
-          - '--args=--only=terraform_workspace_remote'
-      - id: terraform_validate
+      - id: dockerlint
+
+  # Python Code Formatting
+  # Automatically formats Python code to conform to the PEP 8 style guide.
+  # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.1.0
+    hooks:
+      - id: black
+        # It is recommended to specify the latest version of Python
+        # supported by your project here, or alternatively use
+        # pre-commit's default_language_version, see
+        # https://pre-commit.com/#top_level-default_language_version
+        language_version: python3.11
+
+  # General Pre-commit Hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      - id: check-merge-conflict
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
+      - id: check-added-large-files              # prevents giant files from being committed.
+      - id: check-ast                            # simply checks whether the files parse as valid python.
+      - id: check-byte-order-marker              # forbids files which have a utf-8 byte-order marker.
+      - id: check-builtin-literals               # requires literal syntax when initializing empty or zero python builtin types.
+      - id: check-case-conflict                  # checks for files that would conflict in case-insensitive filesystems.
+      - id: check-docstring-first                # checks a common error of defining a docstring after code.
+      - id: check-executables-have-shebangs      # ensures that (non-binary) executables have a shebang.
+      - id: check-json                           # checks json files for parseable syntax.
+      - id: check-shebang-scripts-are-executable # ensures that (non-binary) files with a shebang are executable.
+      - id: pretty-format-json                   # sets a standard for formatting json files.
+        args: [--autofix]
+      - id: check-merge-conflict                 # checks for files that contain merge conflict strings.
+      - id: check-symlinks                       # checks for symlinks which do not point to anything.
+      - id: check-toml                           # checks toml files for parseable syntax.
+      - id: check-vcs-permalinks                 # ensures that links to vcs websites are permalinks.
+      - id: check-xml                            # checks xml files for parseable syntax.
+      - id: check-yaml                           # checks yaml files for parseable syntax.
+      - id: debug-statements                     # checks for debugger imports and py37+ `breakpoint()` calls in python source.
+      - id: destroyed-symlinks                   # detects symlinks which are changed to regular files
+      - id: detect-aws-credentials               # detects *your* aws credentials from the aws cli credentials file.
+        args: [--allow-missing-credentials]
+      - id: detect-private-key                   # detects the presence of private keys.
+      - id: double-quote-string-fixer            # replaces double quoted strings with single quoted strings.
+      - id: end-of-file-fixer                    # ensures that a file is either empty, or ends with one newline.
+        exclude: ^(README\.md)
+      - id: file-contents-sorter                 # sorts the lines in specified files (defaults to alphabetical).
+      - id: fix-byte-order-marker                # removes utf-8 byte order marker.
+      - id: fix-encoding-pragma                  # adds # -*- coding: utf-8 -*- to the top of python files.
+      - id: forbid-new-submodules                # prevents addition of new git submodules.
+      - id: forbid-submodules                    # forbids any submodules in the repository
+      - id: mixed-line-ending                    # replaces or checks mixed line ending.
+      - id: name-tests-test                      # verifies that test files are named correctly.
+      - id: no-commit-to-branch
+        args:
+          - --branch
+          - main
+        # don't commit to branch
+        always_run: true
+        # Skip this hook when running in GitHub Actions during pull request events
+        # GITHUB_HEAD_REF is only set during pull request events and is empty for direct pushes
+        # This allows PR checks to run but still prevents direct pushes to main
+        stages: [commit]
+      - id: requirements-txt-fixer               # sorts entries in requirements.txt.
+      - id: sort-simple-yaml                     # sorts simple yaml files which consist only of top-level keys
+      - id: trailing-whitespace                  # trims trailing whitespace.
+
+  # Python Security Linting
+  # Finds common security issues in Python code.
+  - repo: https://github.com/PyCQA/bandit.git
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        files: .py$
+        exclude: ^(env/|examples/)
+
+  # Python Linting
+  # Checks Python code against some of the style conventions in PEP 8.
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8
+        args: [--max-line-length=120]
+
+  # Terraform Linting and Validation
+  # Provides various hooks to ensure Terraform files are correctly formatted, documented, and free from common errors.
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.98.0
+    hooks:
+      - id: terraform_fmt
+#      - id: terraform_docs
+#        args:
+#          - --args=--output-file=README.md
+#          - --args=--output-mode=replace
+#        exclude: ^(examples/|modules/)
+      - id: terraform_validate
+        args:
+          - --args=-json
+          - --hook-config=--retry-once-with-cleanup=true
+      - id: terraform_tflint
+        args:
+          - --args=--minimum-failure-severity=error
+        verbose: true
+#      - id: terraform_trivy
+      - id: terraform_checkov
+        args:
+          - --args=--skip-path examples/
+          - --args=--download-external-modules true
+#      - id: terrascan
+      - id: infracost_breakdown
+        args:
+          - --args=--path=.
+        verbose: true
+
+  # Python Dependency Management
+  # Helps in compiling and synchronizing Python dependencies.
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 7.4.1
+    hooks:
+      - id: pip-compile
+
+  # AWS CloudFormation Linting
+  # Checks AWS CloudFormation templates against AWS best practices.
+  - repo: https://github.com/aws-cloudformation/cfn-python-lint
+    rev: v1.32.1
+    hooks:
+      - id: cfn-python-lint
+        files: .*\.(json|yml|yaml)$
+        exclude: >-
+          ^(\.pre-commit-config\.yaml|package\.json|\.github/workflows/.*|\.markdownlint\.yaml|
+          \.terraform-docs\.yml|examples/|modules/|\.releaserc\.json|\.ansible-lint)$
+
+  # Local Testing
+  # Runs tests using pytest.
+  - repo: local
+    hooks:
+      - id: tests
+        name: run tests
+        entry: pytest -v
+        language: system
+        types: [python]
+        stages: [push]
+
+  # Ansible Linting
+  # Checks Ansible playbooks for practices and behavior that could potentially be improved.
+  - repo: https://github.com/ansible-community/ansible-lint.git
+    rev: v25.1.3
+    hooks:
+      - id: ansible-lint
+        name: Ansible-lint
+        description: This hook runs ansible-lint.
+        entry: ansible-lint --force-color . --exclude .external_modules/ --exclude .github/
+        language: python
+        # do not pass files to ansible-lint, see:
+        # https://github.com/ansible-community/ansible-lint/issues/611
+        pass_filenames: false
+        always_run: true
+
+  # Check Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli.git
+    rev: v0.44.0
+    hooks:
+      - id: markdownlint-fix
+        exclude: ^(examples/|modules/|CHANGELOG\.md|UPGRADE-.*\.md)
+
+
+  # Check JAVA
+  - repo: https://github.com/gherynos/pre-commit-java.git
+    rev: v0.6.11
+    hooks:
+      - id: pmd
+      - id: cpd
+      - id: checkstyle
+
+  # Check pre-commit was run
+  - repo: https://gitlab.com/adam-moss/pre-commit-trailer.git
+    rev: v1.1.0
+    hooks:
+      - id: add-pre-commit-config-trailer
+      - id: add-pre-commit-user-skipped-trailer
+
+  # Check Make
+  - repo: https://github.com/mrtazz/checkmake.git
+    rev: 0.2.2
+    hooks:
+      - id: checkmake
+        args: [--config=checkmake.ini]

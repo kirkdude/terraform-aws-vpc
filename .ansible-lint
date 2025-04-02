@@ -1,0 +1,12 @@
+---
+# exclude paths from ansible-lint
+exclude_paths:
+  - .external_modules/
+  - .github/
+  - examples/
+
+skip_list:
+  - yaml[line-length]  # Line length
+
+# Define profile to be used
+profile: basic

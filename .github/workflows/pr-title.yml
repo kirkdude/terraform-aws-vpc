@@ -7,6 +7,9 @@ on:
       - edited
       - synchronize
 
+permissions:
+  pull-requests: read # for amannn/action-semantic-pull-request to analyze PRs
+
 jobs:
   main:
     name: Validate PR title

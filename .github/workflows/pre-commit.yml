@@ -6,6 +6,9 @@ on:
       - main
       - master
 
+permissions:
+  contents: read # for checkout
+
 env:
   TERRAFORM_DOCS_VERSION: v0.19.0
   TFLINT_VERSION: v0.53.0
