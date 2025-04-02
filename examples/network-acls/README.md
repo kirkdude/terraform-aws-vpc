@@ -1,23 +1,3 @@
-# Simple VPC with Network ACLs
-
-Configuration in this directory creates set of VPC resources along with network ACLs for several subnets.
-
-Network ACL rules for inbound and outbound traffic are defined as the following:
-1. Public and elasticache subnets will have network ACL rules provided
-1. Private subnets will be associated with the default network ACL rules (IPV4-only ingress and egress is open for all)
-
-## Usage
-
-To run this example you need to execute:
-
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-Note that this example may create resources which can cost money (AWS Elastic IP, for example). Run `terraform destroy` when you don't need these resources.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

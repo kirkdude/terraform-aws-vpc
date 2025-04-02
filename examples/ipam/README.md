@@ -1,29 +1,3 @@
-# VPC with IPAM pool
-
-Configuration in this directory creates set of VPC resources using the CIDR provided by an IPAM pool.
-
-Note: Due to the nature of vending CIDR blocks from an IPAM pool, the IPAM pool must exist prior to creating a VPC using one of the CIDRs from the pool.
-
-## Usage
-
-To run this example you need to execute:
-
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply -target=aws_vpc_ipam_preview_next_cidr.this # CIDR pool must exist before assigning CIDR from pool
-$ terraform apply
-```
-
-To destroy this example you can execute:
-
-```bash
-$ terraform destroy -target=module.vpc # destroy VPC that uses the IPAM pool CIDR first
-$ terraform destroy
-```
-
-Note that this example may create resources which can cost money (AWS Elastic IP, for example). Run `terraform destroy` when you don't need these resources.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

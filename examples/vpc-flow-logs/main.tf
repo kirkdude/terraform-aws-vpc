@@ -181,7 +181,8 @@ data "aws_iam_policy_document" "flow_log_s3" {
 
 # Cloudwatch logs
 resource "aws_cloudwatch_log_group" "flow_log" {
-  name = "vpc-flow-logs-to-cloudwatch-${random_pet.this.id}"
+  name              = "vpc-flow-logs-to-cloudwatch-${random_pet.this.id}"
+  retention_in_days = 365 # Set to 1 year for compliance with CKV_AWS_338
 }
 
 resource "aws_iam_role" "vpc_flow_log_cloudwatch" {

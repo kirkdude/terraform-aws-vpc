@@ -1,8 +1,4 @@
-locals {
-  redshift_route_table_ids = aws_route_table.redshift[*].id
-  public_route_table_ids   = aws_route_table.public[*].id
-  private_route_table_ids  = aws_route_table.private[*].id
-}
+# Route table IDs defined in locals.tf
 
 ################################################################################
 # VPC
@@ -384,7 +380,7 @@ output "redshift_route_table_association_ids" {
 
 output "redshift_public_route_table_association_ids" {
   description = "List of IDs of the public redshift route table association"
-  value       = aws_route_table_association.redshift_public[*].id
+  value       = []
 }
 
 output "redshift_network_acl_id" {

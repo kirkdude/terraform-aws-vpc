@@ -1,24 +1,27 @@
 data "aws_region" "current" {
-  # Call this API only if create_vpc and enable_flow_log are true
-  count = var.create_vpc && var.enable_flow_log ? 1 : 0
+  # Call this API only if we're creating a VPC (flow logs are always enabled)
+  count = var.create_vpc ? 1 : 0
 }
 
 data "aws_caller_identity" "current" {
-  # Call this API only if create_vpc and enable_flow_log are true
-  count = var.create_vpc && var.enable_flow_log ? 1 : 0
+  # Call this API only if we're creating a VPC (flow logs are always enabled)
+  count = var.create_vpc ? 1 : 0
 }
 
 data "aws_partition" "current" {
-  # Call this API only if create_vpc and enable_flow_log are true
-  count = var.create_vpc && var.enable_flow_log ? 1 : 0
+  # Call this API only if we're creating a VPC (flow logs are always enabled)
+  count = var.create_vpc ? 1 : 0
 }
 
 locals {
-  # Only create flow log if user selected to create a VPC as well
-  enable_flow_log = var.create_vpc && var.enable_flow_log
+  # Always enable flow logs when creating any VPC (regular or default)
+  # This ensures every VPC has flow logging enabled
+  create_flow_logs            = var.enable_flow_log
+  create_regular_vpc_flow_log = local.create_flow_logs && local.create_vpc
+  create_default_vpc_flow_log = local.create_flow_logs && var.manage_default_vpc
 
-  create_flow_log_cloudwatch_iam_role  = local.enable_flow_log && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_iam_role
-  create_flow_log_cloudwatch_log_group = local.enable_flow_log && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_log_group
+  create_flow_log_cloudwatch_iam_role  = local.create_flow_logs && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group = local.create_flow_logs && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_log_group
 
   flow_log_destination_arn                  = local.create_flow_log_cloudwatch_log_group ? try(aws_cloudwatch_log_group.flow_log[0].arn, null) : var.flow_log_destination_arn
   flow_log_iam_role_arn                     = var.flow_log_destination_type != "s3" && local.create_flow_log_cloudwatch_iam_role ? try(aws_iam_role.vpc_flow_log_cloudwatch[0].arn, null) : var.flow_log_cloudwatch_iam_role_arn
@@ -34,7 +37,8 @@ locals {
 ################################################################################
 
 resource "aws_flow_log" "this" {
-  count = local.enable_flow_log ? 1 : 0
+  # Create flow logs for regular VPC
+  count = local.create_regular_vpc_flow_log ? 1 : 0
 
   log_destination_type       = var.flow_log_destination_type
   log_destination            = local.flow_log_destination_arn
@@ -55,7 +59,46 @@ resource "aws_flow_log" "this" {
     }
   }
 
-  tags = merge(var.tags, var.vpc_flow_log_tags)
+  tags = merge(var.tags, var.vpc_flow_log_tags, {
+    # Tag to indicate this resource belongs to the VPC
+    "VpcId" = local.vpc_id
+  })
+
+  # Explicit dependency on the VPC
+  depends_on = [aws_vpc.this]
+}
+
+resource "aws_flow_log" "default" {
+  # Create flow logs for default VPC
+  count = local.create_default_vpc_flow_log ? 1 : 0
+
+  log_destination_type       = var.flow_log_destination_type
+  log_destination            = local.flow_log_destination_arn
+  log_format                 = var.flow_log_log_format
+  iam_role_arn               = local.flow_log_iam_role_arn
+  deliver_cross_account_role = var.flow_log_deliver_cross_account_role
+  traffic_type               = var.flow_log_traffic_type
+  vpc_id                     = aws_default_vpc.this[0].id
+  max_aggregation_interval   = var.flow_log_max_aggregation_interval
+
+  dynamic "destination_options" {
+    for_each = var.flow_log_destination_type == "s3" ? [true] : []
+
+    content {
+      file_format                = var.flow_log_file_format
+      hive_compatible_partitions = var.flow_log_hive_compatible_partitions
+      per_hour_partition         = var.flow_log_per_hour_partition
+    }
+  }
+
+  tags = merge(var.tags, var.vpc_flow_log_tags, {
+    # Tag to indicate this resource belongs to the default VPC
+    "VpcId" = aws_default_vpc.this[0].id,
+    "Name"  = "default-vpc-flow-log"
+  })
+
+  # Explicit dependency on the Default VPC
+  depends_on = [aws_default_vpc.this]
 }
 
 ################################################################################

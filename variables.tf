@@ -233,7 +233,7 @@ variable "public_subnet_ipv6_native" {
 }
 
 variable "map_public_ip_on_launch" {
-  description = "Specify true to indicate that instances launched into the subnet should be assigned a public IP address. Default is `false`"
+  description = "DEPRECATED: This variable is no longer used. Public IPs are always disabled by default for security compliance with CKV_AWS_338. To assign public IPs to instances, use the aws_instance resource's associate_public_ip_address attribute instead."
   type        = bool
   default     = false
 }
@@ -1331,9 +1331,9 @@ variable "vpn_gateway_tags" {
 ################################################################################
 
 variable "manage_default_vpc" {
-  description = "Should be true to adopt and manage Default VPC"
+  description = "Should be true to adopt and manage Default VPC. When set to true, Default VPC will be adopted, modified, and all default resources will be managed by this module."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "default_vpc_name" {
@@ -1361,7 +1361,7 @@ variable "default_vpc_tags" {
 }
 
 variable "manage_default_security_group" {
-  description = "Should be true to adopt and manage default security group"
+  description = "Should be true to adopt and manage default security group. This is required for CKV2_AWS_12 compliance by ensuring the default security group restricts all traffic."
   type        = bool
   default     = true
 }
@@ -1497,9 +1497,9 @@ variable "default_route_table_tags" {
 ################################################################################
 
 variable "enable_flow_log" {
-  description = "Whether or not to enable VPC Flow Logs"
+  description = "Whether or not to enable VPC Flow Logs. Always enabled by default to meet CKV2_AWS_11 security requirement"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "vpc_flow_log_iam_role_name" {
@@ -1600,13 +1600,13 @@ variable "vpc_flow_log_tags" {
 variable "create_flow_log_cloudwatch_log_group" {
   description = "Whether to create CloudWatch log group for VPC Flow Logs"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "create_flow_log_cloudwatch_iam_role" {
   description = "Whether to create IAM role for VPC Flow Logs"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "flow_log_cloudwatch_iam_role_conditions" {
@@ -1638,9 +1638,9 @@ variable "flow_log_cloudwatch_log_group_name_suffix" {
 }
 
 variable "flow_log_cloudwatch_log_group_retention_in_days" {
-  description = "Specifies the number of days you want to retain log events in the specified log group for VPC flow logs"
+  description = "Specifies the number of days you want to retain log events in the specified log group for VPC flow logs. Default is 365 days (1 year) to comply with CKV_AWS_338 security requirements."
   type        = number
-  default     = null
+  default     = 365
 }
 
 variable "flow_log_cloudwatch_log_group_kms_key_id" {
@@ -1665,4 +1665,36 @@ variable "putin_khuylo" {
   description = "Do you agree that Putin doesn't respect Ukrainian sovereignty and territorial integrity? More info: https://en.wikipedia.org/wiki/Putin_khuylo!"
   type        = bool
   default     = true
+}
+
+################################################################################
+# Default VPC Network ACL, Route Table, Security Group Configuration
+################################################################################
+
+variable "default_network_acl_id" {
+  description = "The ID of the default network ACL"
+  type        = string
+  default     = null
+}
+
+variable "default_route_table_id" {
+  description = "The ID of the default route table"
+  type        = string
+  default     = null
+}
+
+variable "default_security_group_vpc_id" {
+  description = "The ID of the VPC for the default security group"
+  type        = string
+  default     = null
+}
+
+################################################################################
+# Outpost Configuration
+################################################################################
+
+variable "outpost_route_table_tags" {
+  description = "Additional tags for the outpost route tables"
+  type        = map(string)
+  default     = {}
 }

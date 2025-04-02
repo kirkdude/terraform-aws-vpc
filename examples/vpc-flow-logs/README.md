@@ -1,23 +1,3 @@
-# VPC with enabled VPC flow log to S3 and CloudWatch logs
-
-Configuration in this directory creates a set of VPC resources with VPC Flow Logs enabled in different configurations:
-
-1. `cloud-watch-logs.tf` - Push logs to a new AWS CloudWatch Log group.
-1. `cloud-watch-logs.tf` - Push logs to an existing AWS CloudWatch Log group using existing IAM role (created outside of this module).
-1. `s3.tf` - Push logs to an existing S3 bucket (created outside of this module).
-
-## Usage
-
-To run this example you need to execute:
-
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-Note that this example may create resources which can cost money (AWS Elastic IP, for example). Run `terraform destroy` when you don't need these resources.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

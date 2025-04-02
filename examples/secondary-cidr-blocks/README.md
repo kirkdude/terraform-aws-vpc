@@ -1,21 +1,3 @@
-# Simple VPC with secondary CIDR blocks
-
-Configuration in this directory creates set of VPC resources across multiple CIDR blocks.
-
-There is a public and private subnet created per availability zone in addition to single NAT Gateway shared between all 3 availability zones.
-
-## Usage
-
-To run this example you need to execute:
-
-```bash
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-Note that this example may create resources which can cost money (AWS Elastic IP, for example). Run `terraform destroy` when you don't need these resources.
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

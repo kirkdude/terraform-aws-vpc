@@ -9,8 +9,8 @@ If you find a bug, please open an issue with supporting configuration to reprodu
 - The minimum required Terraform version is now 1.0
 - The minimum required AWS provider version is now 4.x (4.35.0 at time of writing)
 - `assign_ipv6_address_on_creation` has been removed; use the respective subnet type equivalent instead (i.e. - `public_subnet_assign_ipv6_address_on_creation`)
-- `enable_classiclink` has been removed; it is no longer supported by AWS https://github.com/hashicorp/terraform/issues/31730
-- `enable_classiclink_dns_support` has been removed; it is no longer supported by AWS https://github.com/hashicorp/terraform/issues/31730
+- `enable_classiclink` has been removed; it is no longer supported by AWS <https://github.com/hashicorp/terraform/issues/31730>
+- `enable_classiclink_dns_support` has been removed; it is no longer supported by AWS <https://github.com/hashicorp/terraform/issues/31730>
 
 ## Additional changes
 
@@ -30,8 +30,8 @@ If you find a bug, please open an issue with supporting configuration to reprodu
 1. Removed variables:
 
     - `assign_ipv6_address_on_creation` has been removed; use the respective subnet type equivalent instead (i.e. - `public_subnet_assign_ipv6_address_on_creation`)
-    - `enable_classiclink` has been removed; it is no longer supported by AWS https://github.com/hashicorp/terraform/issues/31730
-    - `enable_classiclink_dns_support` has been removed; it is no longer supported by AWS https://github.com/hashicorp/terraform/issues/31730
+    - `enable_classiclink` has been removed; it is no longer supported by AWS <https://github.com/hashicorp/terraform/issues/31730>
+    - `enable_classiclink_dns_support` has been removed; it is no longer supported by AWS <https://github.com/hashicorp/terraform/issues/31730>
 
 2. Renamed variables:
 
