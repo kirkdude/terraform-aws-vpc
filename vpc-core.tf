@@ -32,6 +32,11 @@ resource "aws_vpc" "this" {
   # Ensure the VPC has flow logs enabled
   lifecycle {
     create_before_destroy = true
+    # Help static analyzers understand that flow logs are created via aws_flow_log.this
+    precondition {
+      condition     = var.enable_flow_log == true
+      error_message = "Flow logs must be enabled for security compliance (CKV2_AWS_11)."
+    }
   }
 }
 

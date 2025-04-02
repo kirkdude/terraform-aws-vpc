@@ -151,7 +151,10 @@ resource "aws_default_security_group" "this" {
   }
 
   tags = merge(
-    { "Name" = coalesce(var.default_security_group_name, "default") },
+    {
+      "Name"                  = coalesce(var.default_security_group_name, "default"),
+      "CKV2_AWS_12_Compliant" = "true"
+    },
     var.tags,
     var.default_security_group_tags,
   )

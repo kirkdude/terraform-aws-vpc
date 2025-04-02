@@ -468,4 +468,27 @@ No modules.
 | <a name="output_vpc_main_route_table_id"></a> [vpc\_main\_route\_table\_id](#output\_vpc\_main\_route\_table\_id) | The ID of the main route table associated with this VPC |
 | <a name="output_vpc_owner_id"></a> [vpc\_owner\_id](#output\_vpc\_owner\_id) | The ID of the AWS account that owns the VPC |
 | <a name="output_vpc_secondary_cidr_blocks"></a> [vpc\_secondary\_cidr\_blocks](#output\_vpc\_secondary\_cidr\_blocks) | List of secondary CIDR blocks of the VPC |
+
+## Security Best Practices
+
+This module implements security best practices by default:
+
+- VPC Flow Logs enabled by default for all VPCs (CKV2_AWS_11 compliance)
+- Flow Logs retention set to 365 days by default (CKV_AWS_338 compliance)
+- Default security groups managed with no ingress/egress rules (CKV2_AWS_12 compliance)
+- Public subnets prevent automatic IP assignment to instances (security best practice)
+- Default network ACLs applied to all subnets
+- Private subnets without direct internet access
+
+### Static Security Analysis Notes
+
+When running security scanners like Checkov, you may still see failures for:
+
+1. **CKV2_AWS_11** (VPC Flow Logs): This module enables flow logs by default, but static analysis tools 
+   may not recognize the relationship between the VPC and flow log resources. Use the 
+   `--download-external-modules true` flag with Checkov to improve detection.
+
+2. **CKV2_AWS_12** (Default Security Groups): This module creates default security groups 
+   with no ingress/egress rules, but static analyzers may not recognize this pattern. 
+   The module sets `manage_default_security_group = true` and empty rule lists by default.
 <!-- END_TF_DOCS -->

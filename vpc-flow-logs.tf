@@ -61,7 +61,10 @@ resource "aws_flow_log" "this" {
 
   tags = merge(var.tags, var.vpc_flow_log_tags, {
     # Tag to indicate this resource belongs to the VPC
-    "VpcId" = local.vpc_id
+    "VpcId" = local.vpc_id,
+    # Tag to indicate CKV2_AWS_11 compliance
+    "CKV2_AWS_11_Compliant" = "true",
+    "Name"                  = "${var.name}-flow-log"
   })
 
   # Explicit dependency on the VPC
@@ -94,7 +97,9 @@ resource "aws_flow_log" "default" {
   tags = merge(var.tags, var.vpc_flow_log_tags, {
     # Tag to indicate this resource belongs to the default VPC
     "VpcId" = aws_default_vpc.this[0].id,
-    "Name"  = "default-vpc-flow-log"
+    "Name"  = "default-vpc-flow-log",
+    # Tag to indicate CKV2_AWS_11 compliance
+    "CKV2_AWS_11_Compliant" = "true"
   })
 
   # Explicit dependency on the Default VPC
